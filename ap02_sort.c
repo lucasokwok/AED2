@@ -1,3 +1,6 @@
+//AP02 AED2 Prof Álvaro
+//Lucas de Oliveira Kwok - 163919
+
 #include<stdio.h>
 #include<stdlib.h>
 
@@ -64,21 +67,37 @@ void insertion_sort(int vetor[], int n){
     int comparacoes = 0;
     int trocas = 0;
 
-    for(int i = 1; i < n; i++){
-        int j = i;
-
-        comparacoes++; // p/ a primeira comparacao do while
-        while (j > 0 && vetor[j] < vetor[j - 1])
-        {
-            swap(&vetor[j], &vetor[j - 1]);
+    for (int i = 1; i < n; i++) {
+        int atual = vetor[i];
+        int j = i - 1;
+        /*
+        comparacoes++; //somando errado as comparacoes
+        while (j >= 0 && vetor[j] > atual) {
+            comparacoes++;
+            vetor[j + 1] = vetor[j]; 
             trocas++;
-            j --;
+            j--;
+        }*/
 
-            if (j > 0) comparacoes++; //pois cada passada no while é uma comparacao
+        while (j >= 0) {
+            comparacoes++; 
+            if (vetor[j] > atual) {
+                vetor[j + 1] = vetor[j]; 
+                trocas++;
+                j--;
+            } else {
+                break;
+            }
+        }
+
+        if (j + 1 != i) {
+            vetor[j + 1] = atual; // insercao na posicao
+            trocas++;
         }
     }
-    printf("%d %d", comparacoes, trocas);
+    printf("%d %d\n", comparacoes, trocas);
 }
+
 
 int main(){
     int n = 0;
