@@ -7,6 +7,8 @@
 #define TRUE 1
 #define FALSE 0
 
+int comparacoes = 0;
+
 void swap(int* x, int* y){
     int aux = *x;
     *x = *y;
@@ -25,20 +27,19 @@ void merge(int vetor[], int l, int m, int r)
     int n1 = m - l + 1;
     int n2 = r - m;
 
-    // Create temp vetorays
     int L[n1], R[n2];
 
-    // Copy data to temp vetorays L[] and R[]
     for (i = 0; i < n1; i++)
         L[i] = vetor[l + i];
     for (j = 0; j < n2; j++)
         R[j] = vetor[m + 1 + j];
 
-    // Merge the temp vetorays back into vetor[l..r
     i = 0;
     j = 0;
     k = l;
+    comparacoes++;
     while (i < n1 && j < n2) {
+        comparacoes++;
         if (L[i] <= R[j]) {
             vetor[k] = L[i];
             i++;
@@ -50,16 +51,12 @@ void merge(int vetor[], int l, int m, int r)
         k++;
     }
 
-    // Copy the remaining elements of L[],
-    // if there are any
     while (i < n1) {
         vetor[k] = L[i];
         i++;
         k++;
     }
 
-    // Copy the remaining elements of R[],
-    // if there are any
     while (j < n2) {
         vetor[k] = R[j];
         j++;
@@ -67,8 +64,16 @@ void merge(int vetor[], int l, int m, int r)
     }
 }
 
-void merge_sort(){
+void mergeSort(int vetor[], int esq, int dir)
+{
+    //comparacoes++;
+    if (esq >= dir)
+        return;//caso base
 
+    int meio = esq + (dir - esq) / 2;
+    mergeSort(vetor, esq, meio);
+    mergeSort(vetor, meio + 1, dir);
+    merge(vetor, esq, meio, dir);
 }
 
 int mediana_de_tres(int v[], int inicio, int fim) {
@@ -98,6 +103,7 @@ int partition(int v[], int inicio, int fim) {
         while (v[++i] < pivo);
         while (v[--j] > pivo);
 
+        comparacoes++;
         if (i < j)
             swap(&v[i], &v[j]);
         else
@@ -108,47 +114,66 @@ int partition(int v[], int inicio, int fim) {
     return i;
 }
 
-void quicksort(int v[], int inicio, int fim) {
+void quick_sort(int v[], int inicio, int fim) {
+    comparacoes++;
     if (fim - inicio <= 2) {
+        comparacoes++;
         if (v[inicio] > v[fim])
             swap(&v[inicio], &v[fim]);
         return;
     }
 
     int pivo = partition(v, inicio, fim);
-    quicksort(v, inicio, pivo - 1);
-    quicksort(v, pivo + 1, fim);
+    quick_sort(v, inicio, pivo - 1);
+    quick_sort(v, pivo + 1, fim);
 }
 
-void quick_sort_hibrido(){
+void insertion_sort(int vetor[], int inicio, int fim) {
+    //int comparacoes = 0;
+    //int trocas = 0;
 
-}
-
-void insertion_sort(int vetor[], int n){
-    int comparacoes = 0;
-    int trocas = 0;
-
-    for (int i = 1; i < n; i++) {
+    for (int i = inicio + 1; i <= fim; i++) {
         int atual = vetor[i];
         int j = i - 1;
 
-        while (j >= 0) {
+        while (j >= inicio) {
             comparacoes++; 
             if (vetor[j] > atual) {
                 vetor[j + 1] = vetor[j]; 
-                trocas++;
+                //trocas++;
                 j--;
             } else {
                 break;
             }
         }
 
+        comparacoes++;
         if (j + 1 != i) {
             vetor[j + 1] = atual; // insercao na posicao
-            trocas++;
+            //trocas++;
         }
     }
-    printf("%d %d\n", comparacoes, trocas);
+    //printf("%d %d\n", comparacoes, trocas);
+}
+
+void quick_sort_hibrido(int vetor[], int inicio, int fim){
+     while (inicio < fim) {
+        comparacoes++;
+        if (fim - inicio + 1 < 10) {
+            insertion_sort(vetor, inicio, fim);
+            break;
+        } else {
+            int pivo = partition(vetor, inicio, fim);
+            comparacoes++;
+            if (pivo - inicio < fim - pivo) {
+                quick_sort_hibrido(vetor, inicio, pivo - 1);
+                inicio = pivo + 1;
+            } else {
+                quick_sort_hibrido(vetor, pivo + 1, fim);
+                fim = pivo - 1;
+            }
+        }
+    }
 }
 
 int main(){
@@ -163,13 +188,35 @@ int main(){
     }
 
     copiar_vetor(vetorOriginal, vetorNovo, n);
-    selection_sort(vetorNovo, n);
+    mergeSort(vetorNovo, 0, n - 1);
 
-    copiar_vetor(vetorOriginal, vetorNovo, n);
-    bubble_sort(vetorNovo, n);
+    for(int i = 0; i<n; i++)
+        printf("%d ", vetorNovo[i]);
 
+    printf("\n");
+    printf("%d", comparacoes);
+    comparacoes = 0;
+    printf("\n");
+        
     copiar_vetor(vetorOriginal, vetorNovo, n);
-    insertion_sort(vetorNovo, n);
+    quick_sort(vetorNovo, 0, n - 1);
+
+    for(int i = 0; i<n; i++)
+        printf("%d ", vetorNovo[i]);
+
+    printf("\n");
+    printf("%d", comparacoes);
+    comparacoes = 0;
+    printf("\n");
+        
+    copiar_vetor(vetorOriginal, vetorNovo, n);
+    quick_sort_hibrido(vetorNovo, 0, n - 1);
+
+    for(int i = 0; i<n; i++)
+        printf("%d ", vetorNovo[i]);
+
+    printf("\n");
+    printf("%d", comparacoes);
 
     free(vetorOriginal);
     free(vetorNovo);
