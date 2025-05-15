@@ -147,7 +147,6 @@ void insertion_sort(int vetor[], int inicio, int fim) {
             }
         }
 
-        comparacoes++;
         if (j + 1 != i) {
             vetor[j + 1] = atual; // insercao na posicao
             //trocas++;
