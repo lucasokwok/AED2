@@ -9,7 +9,6 @@
 
 int comparacoesMerge = 0;
 int comparacoesQuick = 0;
-int comparacoesQuickHibrido = 0;
 
 void swap(int* x, int* y){
     int aux = *x;
@@ -42,26 +41,34 @@ void merge(int vetor[], int esquerda, int meio, int direita)
 
     while (i < tamEsq && j < tamDir) {
         comparacoesMerge++; 
-        if (esq[i] <= dir[j])
-            vetor[k++] = esq[i++];
-        else
-            vetor[k++] = dir[j++];
+        if (esq[i] <= dir[j]){
+            vetor[k] = esq[i];
+            i++;
+            k++;
+        } else {
+            vetor[k] = dir[j];
+            j++;
+            k++;
+        }
     }
 
     while (i < tamEsq) {
         comparacoesMerge++; 
-        vetor[k++] = esq[i++];
+        vetor[k] = esq[i];
+        k++;
+        i++;
     }
 
     while (j < tamDir) {
         comparacoesMerge++;
-        vetor[k++] = dir[j++];
+        vetor[k] = dir[j];
+        k++;
+        j++;
     }
 
     free(esq);
     free(dir);
 }
-
 
 void mergeSort(int vetor[], int esquerda, int direita)
 {
@@ -74,65 +81,76 @@ void mergeSort(int vetor[], int esquerda, int direita)
     }
 }
 
-int partition(int A[], int inicio, int fim, int pivo) {
-    int i = inicio;
-    int j = fim;
+int mediana3(int vetor[], int inicio, int fim) {
+    int meio = inicio + (fim - inicio) / 2;
+    
+    comparacoesQuick++;
+    if (vetor[inicio] > vetor[meio])
+        swap(&vetor[inicio], &vetor[meio]);
+    
+    comparacoesQuick++;
+    if (vetor[inicio] > vetor[fim])
+        swap(&vetor[inicio], &vetor[fim]);
+    
+    comparacoesQuick++;
+    if (vetor[meio] > vetor[fim])
+        swap(&vetor[meio], &vetor[fim]);
+    
+    return meio;
+}
 
-    while (i <= j) {
-        while (A[i] < pivo) i++;
-        while (A[j] > pivo) j--;
-
-        comparacoesQuick++;
-        if (i <= j) {
-            swap(&A[i], &A[j]);
-            i++;
+void insertionSort(int vetor[], int inicio, int fim) {
+    for (int i = inicio + 1; i <= fim; i++) {
+        int atual = vetor[i];
+        int j = i - 1;
+        
+        while (j >= inicio && vetor[j] > atual) {
+            comparacoesQuick++;
+            vetor[j + 1] = vetor[j];
             j--;
         }
+        if (j >= inicio) 
+            comparacoesQuick++;
+        vetor[j + 1] = atual;
     }
+}
 
+int partition(int vetor[], int inicio, int fim) {
+    int pivo_pos = mediana3(vetor, inicio, fim);
+    int pivo = vetor[pivo_pos];
+    swap(&vetor[pivo_pos], &vetor[fim]);
+    
+    int i = inicio;
+    for (int j = inicio; j < fim; j++) {
+        comparacoesQuick++;
+        if (vetor[j] <= pivo) {
+            swap(&vetor[i], &vetor[j]);
+            i++;
+        }
+    }
+    swap(&vetor[i], &vetor[fim]);
     return i;
 }
 
-void quicksortMedianaDeTres(int A[], int inicio, int fim) {
-    if (inicio >= fim) return;
-
-    int meio = inicio + (fim - inicio) / 2;
-    int a = A[inicio], b = A[meio], c = A[fim];
-
-    // calcula valor da mediana entre os 3
-    //comparacoesQuick += 3; // ou 5, dependendo do que o exercício espera
-    int pivo;
-    if (a < b) {
-        if (b < c) {
-            // a < b < c
-            pivo = b;
-        } else if (a < c) {
-            // a < c <= b
-            pivo = c;
-        } else {
-            // c <= a < b
-            pivo = a;
-        }
-    } else {
-        if (c < b) {
-            // c < b <= a
-            pivo = b;
-        } else if (c < a) {
-            // b <= c < a
-            pivo = c;
-        } else {
-            // b <= a <= c
-            pivo = a;
-        }
+void quicksort(int vetor[], int inicio, int fim) {
+    if (inicio < fim) {
+        int p = partition(vetor, inicio, fim);
+        quicksort(vetor, inicio, p - 1);
+        quicksort(vetor, p + 1, fim);
     }
-
-
-    int index = partition(A, inicio, fim, pivo);
-
-    quicksortMedianaDeTres(A, inicio, index - 1);
-    quicksortMedianaDeTres(A, index, fim);
 }
 
+void quicksortHibrido(int vetor[], int inicio, int fim) {
+    if (inicio < fim) {
+        if (fim - inicio + 1 <= 5) {
+            insertionSort(vetor, inicio, fim);
+        } else {
+            int p = partition(vetor, inicio, fim);
+            quicksortHibrido(vetor, inicio, p - 1);
+            quicksortHibrido(vetor, p + 1, fim);
+        }
+    }
+}
 
 int main()
 {
@@ -156,7 +174,17 @@ int main()
     printf("%d\n", comparacoesMerge);
 
     copiar_vetor(vetorOriginal, vetorNovo, n);
-    quicksortMedianaDeTres(vetorNovo, 0, n - 1);
+    quicksort(vetorNovo, 0, n - 1);
+
+    for(int i = 0; i<n; i++)
+        printf("%d ", vetorNovo[i]);
+
+    printf("\n");
+    printf("%d\n", comparacoesQuick);
+    comparacoesQuick = 0;
+
+    copiar_vetor(vetorOriginal, vetorNovo, n);
+    quicksortHibrido(vetorNovo, 0, n - 1);
 
     for(int i = 0; i<n; i++)
         printf("%d ", vetorNovo[i]);
